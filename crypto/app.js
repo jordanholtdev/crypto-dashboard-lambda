@@ -1,4 +1,4 @@
-const axios = require('axios')
+const axios = require('axios');
 
 /**
  *
@@ -12,16 +12,68 @@ const axios = require('axios')
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
+
+// get market data on 100 coins with top market cap
+async function getCoinMarketData() {
+    const url = `https://api.coingecko.com/api/v3/coins/markets`;
+
+    config = {
+        params: {
+            vs_currency: "usd",
+            order: "market_cap_desc",
+            per_page: "100",
+            page: 1,
+            sparkline: false
+        }
+    }
+
+    return axios.get(url, config)
+
+}
+
+// get data on specifc coins
+async function getCoinData(coin) {
+    const url = `https://api.coingecko.com/api/v3/coins/${coin}`;
+
+    config = {
+        params: {
+            localization: false,
+            sparkline: true,
+            community_data: true,
+            developer_data: false
+        }
+    }
+    return axios.get(url, config)
+}
+
+// get all data and modify for use
+async function getAllData() {
+    let allData;
+    try {
+        await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('cardano'), getCoinData('ontology'), getCoinData('ripple'), getCoinData('dai'), getCoinData('litecoin'), getCoinMarketData()])
+            .then((results => {
+                allData = JSON.stringify({
+                    bitcoin: results[0].data,
+                    ethereum: results[1].data,
+                    tether: results[2].data,
+                    cardano: results[3].data,
+                    ontology: results[4].data,
+                    ripple: results[5].data,
+                    dai: results[6].data,
+                    litecoin: results[7].data,
+                    marketData: results[8].data
+                })
+            }))
+
+    } catch (error) {
+        console.error(error)
+    }
+    return allData;
+}
+
+
 exports.lambdaHandler = async (event, context) => {
 
-    const url = `https://jsonplaceholder.typicode.com/todos/1`
-
-    const ret = axios.get(url)
-        .then((response) => {
-            console.log(response)
-        }).then((error) => {
-            console.log(error)
-        })
-
-    return ret
+    const data = await getAllData()
+    return data;
 };

@@ -1,4 +1,15 @@
 const axios = require('axios');
+// create a connection to the db
+const knex = require('knex')({
+    client: 'mysql',
+    connection: {
+        host: process.env.MySqlHost,
+        port: 3306,
+        user: process.env.DbUser,
+        password: process.env.DbPw,
+        database: process.env.DbName
+    }
+});
 
 /**
  *
@@ -52,7 +63,7 @@ async function getAllData() {
     try {
         await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('cardano'), getCoinData('ontology'), getCoinData('ripple'), getCoinData('dai'), getCoinData('litecoin'), getCoinMarketData()])
             .then((results => {
-                allData = JSON.stringify({
+                allData = {
                     bitcoin: results[0].data,
                     ethereum: results[1].data,
                     tether: results[2].data,
@@ -62,7 +73,7 @@ async function getAllData() {
                     dai: results[6].data,
                     litecoin: results[7].data,
                     marketData: results[8].data
-                })
+                }
             }))
 
     } catch (error) {
@@ -71,9 +82,24 @@ async function getAllData() {
     return allData;
 }
 
+// test the connection
+let counter = 0;
+
 
 exports.lambdaHandler = async (event, context) => {
 
-    const data = await getAllData()
-    return data;
+    try {
+        const data = await getAllData()
+        console.log(data.bitcoin.market_data.current_price.cad)
+        counter++
+        await knex('vals').insert({
+            key: `coin: ${data.bitcoin.id}`,
+            val: data.bitcoin.market_data.current_price.cad,
+        });
+        const res = await knex('vals').select();
+        console.log(res)
+    } catch (error) {
+        console.error(error)
+    }
+
 };

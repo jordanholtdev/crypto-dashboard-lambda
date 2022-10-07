@@ -7,13 +7,11 @@
   "author": "SAM CLI",
   "license": "MIT",
   "dependencies": {
-    "axios": ">=0.21.1"
+    "axios": "^1.1.2",
+    "knex": "^2.3.0",
+    "mysql": "^2.18.1"
   },
   "scripts": {
     "test": "mocha tests/unit/"
-  },
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^9.1.4"
   }
 }

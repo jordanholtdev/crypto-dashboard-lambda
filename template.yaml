@@ -5,6 +5,21 @@ Description: >
 
   SAM Template for the Crypto Dashboard project. This contains all the config for the serverless aspect of the project.
 
+
+Parameters:
+  DataBaseHost:
+    Type: String
+    Description: Required db host
+  DataBaseUser:
+    Type: String
+    Description: Database user
+  DataBaseName:
+    Type: String
+    Description: The name of the database that is being connected
+  DataBaseUserPw:
+    Type: String
+    Description: The pw for the database user
+
 Resources:
   GetCoinDataFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -12,6 +27,12 @@ Resources:
       CodeUri: crypto/
       Handler: app.lambdaHandler
       Runtime: nodejs16.x
+      Environment:
+        Variables:
+          MySqlHost: !Ref DataBaseHost
+          DbUser: !Ref DataBaseUser
+          DbPw: !Ref DataBaseUserPw
+          DbName: !Ref DataBaseName
       Architectures:
         - x86_64
 

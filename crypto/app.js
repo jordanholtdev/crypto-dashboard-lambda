@@ -28,7 +28,7 @@ const knex = require('knex')({
 async function getCoinMarketData() {
     const url = `https://api.coingecko.com/api/v3/coins/markets`;
 
-    config = {
+    let config = {
         params: {
             vs_currency: "usd",
             order: "market_cap_desc",
@@ -46,7 +46,7 @@ async function getCoinMarketData() {
 async function getCoinData(coin) {
     const url = `https://api.coingecko.com/api/v3/coins/${coin}`;
 
-    config = {
+    let config = {
         params: {
             localization: false,
             sparkline: true,
@@ -61,19 +61,18 @@ async function getCoinData(coin) {
 async function getAllData() {
     let allData;
     try {
-        await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('cardano'), getCoinData('ontology'), getCoinData('ripple'), getCoinData('dai'), getCoinData('litecoin'), getCoinMarketData()])
+        await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('cardano'), getCoinData('ontology'), getCoinData('ripple'), getCoinData('dai'), getCoinData('litecoin')])
             .then((results => {
-                allData = {
-                    bitcoin: results[0].data,
-                    ethereum: results[1].data,
-                    tether: results[2].data,
-                    cardano: results[3].data,
-                    ontology: results[4].data,
-                    ripple: results[5].data,
-                    dai: results[6].data,
-                    litecoin: results[7].data,
-                    marketData: results[8].data
-                }
+                allData = [
+                    results[0].data,
+                    results[1].data,
+                    results[2].data,
+                    results[3].data,
+                    results[4].data,
+                    results[5].data,
+                    results[6].data,
+                    results[7].data,
+                ]
             }))
 
     } catch (error) {
@@ -82,21 +81,28 @@ async function getAllData() {
     return allData;
 }
 
-// test the connection
-let counter = 0;
-
-
 exports.lambdaHandler = async (event, context) => {
 
     try {
-        const data = await getAllData()
-        console.log(data.bitcoin.market_data.current_price.cad)
-        counter++
-        await knex('vals').insert({
-            key: `coin: ${data.bitcoin.id}`,
-            val: data.bitcoin.market_data.current_price.cad,
-        });
-        const res = await knex('vals').select();
+        let d = new Date()
+        const data = await getAllData();
+        // loop through coins and insert into db
+        for (const coin of data) {
+            await knex('coins').insert({
+                id: coin.id,
+                symbol: coin.symbol,
+                block_time_in_minutes: coin.block_time_in_minutes,
+                description: coin.description.en,
+                image: coin.image.small,
+                market_cap_rank: coin.market_cap_rank,
+                cg_liquidity_score: coin.liquidity_score,
+                genesis_date: coin.genesis_date,
+                last_updated: coin.last_updated,
+                created_date: d.toISOString()
+            });
+        }
+
+        const res = await knex('coins').select('created_date');
         console.log(res)
     } catch (error) {
         console.error(error)

@@ -24,24 +24,6 @@ const knex = require('knex')({
  *
  */
 
-// get market data on 100 coins with top market cap
-async function getCoinMarketData() {
-    const url = `https://api.coingecko.com/api/v3/coins/markets`;
-
-    let config = {
-        params: {
-            vs_currency: "usd",
-            order: "market_cap_desc",
-            per_page: "100",
-            page: 1,
-            sparkline: false
-        }
-    }
-
-    return axios.get(url, config)
-
-}
-
 // get data on specifc coins
 async function getCoinData(coin) {
     const url = `https://api.coingecko.com/api/v3/coins/${coin}`;
@@ -61,7 +43,7 @@ async function getCoinData(coin) {
 async function getAllData() {
     let allData;
     try {
-        await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('cardano'), getCoinData('ontology'), getCoinData('ripple'), getCoinData('dai'), getCoinData('litecoin')])
+        await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('usd-coin'), getCoinData('binancecoin'), getCoinData('ripple'), getCoinData('binance-usd'), getCoinData('cardano'), getCoinData('solana'), getCoinData('dogecoin')])
             .then((results => {
                 allData = [
                     results[0].data,
@@ -72,6 +54,8 @@ async function getAllData() {
                     results[5].data,
                     results[6].data,
                     results[7].data,
+                    results[8].data,
+                    results[9].data,
                 ]
             }))
 
@@ -88,24 +72,19 @@ exports.lambdaHandler = async (event, context) => {
         const data = await getAllData();
         // loop through coins and insert into db
         for (const coin of data) {
-            await knex('coins').insert({
-                id: coin.id,
-                symbol: coin.symbol,
-                block_time_in_minutes: coin.block_time_in_minutes,
-                description: coin.description.en,
-                image: coin.image.small,
-                market_cap_rank: coin.market_cap_rank,
+
+            await knex('coin_price').insert({
+                coin_id: coin.id,
                 cg_liquidity_score: coin.liquidity_score,
-                genesis_date: coin.genesis_date,
-                last_updated: coin.last_updated,
+                market_cap: coin.market_data.market_cap.usd,
+                total_volume: coin.market_data.total_volume.usd,
+                price_usd: coin.market_data.current_price.usd,
+                last_updated: coin.market_data.last_updated,
                 created_date: d.toISOString()
             });
         }
 
-        const res = await knex('coins').select('created_date');
-        console.log(res)
     } catch (error) {
         console.error(error)
     }
-
 };

@@ -72,7 +72,6 @@ exports.lambdaHandler = async (event, context) => {
         const data = await getAllData();
         // loop through coins and insert into db
         for (const coin of data) {
-
             await knex('coin_price').insert({
                 coin_id: coin.id,
                 cg_liquidity_score: coin.liquidity_score,
@@ -83,7 +82,6 @@ exports.lambdaHandler = async (event, context) => {
                 created_date: d.toISOString()
             });
         }
-
     } catch (error) {
         console.error(error)
     }

@@ -27,7 +27,7 @@ Resources:
       CodeUri: crypto/
       Handler: app.lambdaHandler
       Runtime: nodejs16.x
-      Timeout: 20
+      Timeout: 45
       Policies:
         - AWSLambdaVPCAccessExecutionRole
       Environment:

@@ -39,3 +39,27 @@ Resources:
       Architectures:
         - x86_64
 
+  CryptoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+  LambdaFunctionOverHttps:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: crypto/
+      Handler: api.handler
+      Runtime: nodejs16.x
+      Timeout: 45
+      Environment:
+        Variables:
+          MySqlHost: !Ref DataBaseHost
+          DbUser: !Ref DataBaseUser
+          DbPw: !Ref DataBaseUserPw
+          DbName: !Ref DataBaseName
+      Events:
+        HttpGet:
+          Type: Api
+          Properties:
+            Path: '/coins'
+            Method: get
+            RestApiId: !Ref CryptoApi

@@ -32,12 +32,6 @@ exports.handler = async (event) => {
         day = event.headers.day;
     }
 
-    // if (event.body) {
-    //     let body = JSON.parse(event.body)
-    //     if (body.time)
-    //         time = body.time;
-    // }
-
     let responseBody = {
         data: id,
         coinInfo: info

@@ -38,12 +38,11 @@ Resources:
           DbName: !Ref DataBaseName
       Architectures:
         - x86_64
-
   CryptoApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
-  LambdaFunctionOverHttps:
+  ServeCoinDataOverHttps:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: crypto/
@@ -63,3 +62,8 @@ Resources:
             Path: '/coins'
             Method: get
             RestApiId: !Ref CryptoApi
+            RequestParameters:
+              - method.request.querystring.info:
+                Required: false
+              - method.request.querystring.id:
+                Required: true

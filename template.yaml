@@ -56,14 +56,21 @@ Resources:
           DbPw: !Ref DataBaseUserPw
           DbName: !Ref DataBaseName
       Events:
-        HttpGet:
+        GetCoin:
+          Type: Api
+          Properties:
+            Path: '/coin'
+            Method: get
+            RestApiId: !Ref CryptoApi
+        GetCoins:
           Type: Api
           Properties:
             Path: '/coins'
             Method: get
             RestApiId: !Ref CryptoApi
-            RequestParameters:
-              - method.request.querystring.info:
-                Required: false
-              - method.request.querystring.id:
-                Required: true
+        GetCoinInfo:
+          Type: Api
+          Properties:
+            Path: '/coin/info'
+            Method: get
+            RestApiId: !Ref CryptoApi

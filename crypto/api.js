@@ -10,45 +10,54 @@ const knex = require('knex')({
     }
 });
 
+const coinsPath = '/coins';
+const coinPath = '/coin';
+const infoPath = '/coin/info';
+
+
 exports.handler = async (event) => {
-    let id;
-    let info = false;
-    let day = '';
-    let responseCode = 200;
-    console.log("request: " + JSON.stringify(event));
-
-    if (event.queryStringParameters && event.queryStringParameters.id) {
-        const coinPrice = await knex.select('*').from('coin_price').where('coin_id', event.queryStringParameters.id).orderBy('created_date', 'desc')
-        id = coinPrice;
+    let response;
+    // console.log("request: " + JSON.stringify(event));
+    switch (true) {
+        case event.httpMethod === 'GET' && event.path === coinPath:
+            response = await getCoin(event.queryStringParameters.id);
+            break;
+        case event.httpMethod === 'GET' && event.path === coinsPath:
+            response = await getCoins();
+            break;
+        case event.httpMethod === 'GET' && event.path === infoPath:
+            response = await getCoinInfo(event.queryStringParameters.id)
+            break;
     }
-
-    if (event.queryStringParameters && event.queryStringParameters.info) {
-        const coinInfo = await knex.select('*').from('coin_info').where('coin_id', event.queryStringParameters.id)
-        info = coinInfo;
-    }
-
-    if (event.headers && event.headers['day']) {
-        console.log("Received day: " + event.headers.day);
-        day = event.headers.day;
-    }
-
-    let responseBody = {
-        data: id,
-        coinInfo: info
-    };
-    // The output from a Lambda proxy integration must be
-    // in the following JSON object. The 'headers' property
-    // is for custom response headers in addition to standard
-    // ones. The 'body' property  must be a JSON string. For
-    // base64-encoded payload, you must also set the 'isBase64Encoded'
-    // property to 'true'.
-    let response = {
-        statusCode: responseCode,
-        headers: {
-            "x-custom-header": "my custom header value"
-        },
-        body: JSON.stringify(responseBody)
-    };
-    console.log("response: " + JSON.stringify(response))
+    // console.log("response: " + JSON.stringify(response))
     return response;
 };
+
+function buildResponse(statusCode, body) {
+    return {
+        statusCode: statusCode,
+        headers: {
+            "x-custom-header": "my custom header value",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    }
+}
+
+async function getCoin(id) {
+    const coinPrice = await knex.select('*').from('coin_price').where('coin_id', id).orderBy('created_date', 'desc');
+    return buildResponse(200, coinPrice)
+}
+
+async function getCoins() {
+    const allCoins = await knex.select('*').from('coin_price').orderBy([
+        { column: 'created_date', order: 'desc' },
+        { column: 'price_usd', order: 'desc' }
+    ])
+    return buildResponse(200, allCoins);
+}
+
+async function getCoinInfo(id) {
+    const info = await knex.select('*').from('coin_info').where('coin_id', id);
+    return buildResponse(200, info);
+}

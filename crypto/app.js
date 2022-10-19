@@ -68,18 +68,18 @@ async function getAllData() {
 exports.lambdaHandler = async (event, context) => {
 
     try {
-        let d = new Date()
         const data = await getAllData();
         // loop through coins and insert into db
         for (const coin of data) {
             await knex('coin_price').insert({
                 coin_id: coin.id,
+                image: coin.image.thumb,
                 cg_liquidity_score: coin.liquidity_score,
                 market_cap: coin.market_data.market_cap.usd,
                 total_volume: coin.market_data.total_volume.usd,
                 price_usd: coin.market_data.current_price.usd,
+                price_change_percentage_24h: coin.market_data.price_change_percentage_24h,
                 last_updated: coin.market_data.last_updated,
-                created_date: d.toISOString()
             });
         }
     } catch (error) {

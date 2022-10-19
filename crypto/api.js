@@ -27,7 +27,7 @@ exports.handler = async (event) => {
             response = await getCoins();
             break;
         case event.httpMethod === 'GET' && event.path === infoPath:
-            response = await getCoinInfo(event.queryStringParameters.id)
+            response = await getCoinInfo();
             break;
         case event.httpMethod === 'GET' && event.path === portfolioPath:
             response = await getPortfolio();
@@ -68,7 +68,7 @@ async function getPortfolio() {
     return buildResponse(200, holdings);
 }
 
-async function getCoinInfo(id) {
-    const info = await knex.select('*').from('coin_info').where('coin_id', id);
+async function getCoinInfo() {
+    const info = await knex.select('*').from('coin_info');
     return buildResponse(200, info);
 }

@@ -13,6 +13,7 @@ const knex = require('knex')({
 const coinsPath = '/coins';
 const coinPath = '/coin';
 const infoPath = '/coin/info';
+const portfolioPath = '/portfolio';
 
 
 exports.handler = async (event) => {
@@ -28,6 +29,8 @@ exports.handler = async (event) => {
         case event.httpMethod === 'GET' && event.path === infoPath:
             response = await getCoinInfo(event.queryStringParameters.id)
             break;
+        case event.httpMethod === 'GET' && event.path === portfolioPath:
+            response = await getPortfolio();
     }
     // console.log("response: " + JSON.stringify(response))
     return response;
@@ -38,6 +41,7 @@ function buildResponse(statusCode, body) {
         statusCode: statusCode,
         headers: {
             "x-custom-header": "my custom header value",
+            "Access-Control-Allow-Origin": "*",
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
@@ -55,6 +59,13 @@ async function getCoins() {
         { column: 'price_usd', order: 'desc' }
     ])
     return buildResponse(200, allCoins);
+}
+
+async function getPortfolio() {
+    const holdings = await knex.select('*').from('holdings').orderBy([
+        { column: 'purchase_date', order: 'desc' }
+    ])
+    return buildResponse(200, holdings);
 }
 
 async function getCoinInfo(id) {

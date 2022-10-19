@@ -74,3 +74,9 @@ Resources:
             Path: '/coin/info'
             Method: get
             RestApiId: !Ref CryptoApi
+        GetPortfolio:
+          Type: Api
+          Properties:
+            Path: '/portfolio'
+            Method: get
+            RestApiId: !Ref CryptoApi

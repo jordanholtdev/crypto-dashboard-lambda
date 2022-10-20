@@ -73,6 +73,7 @@ exports.lambdaHandler = async (event, context) => {
         for (const coin of data) {
             await knex('coin_price').insert({
                 coin_id: coin.id,
+                name: coin.name,
                 image: coin.image.thumb,
                 cg_liquidity_score: coin.liquidity_score,
                 market_cap: coin.market_data.market_cap.usd,
@@ -82,6 +83,7 @@ exports.lambdaHandler = async (event, context) => {
                 last_updated: coin.market_data.last_updated,
             });
         }
+        return "complete";
     } catch (error) {
         console.error(error)
     }

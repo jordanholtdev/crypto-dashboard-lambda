@@ -80,6 +80,7 @@ exports.lambdaHandler = async (event, context) => {
                 total_volume: coin.market_data.total_volume.usd,
                 price_usd: coin.market_data.current_price.usd,
                 price_change_percentage_24h: coin.market_data.price_change_percentage_24h,
+                price_change_24h: coin.market_data.price_change_24h,
                 last_updated: coin.market_data.last_updated,
             });
         }

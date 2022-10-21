@@ -63,18 +63,21 @@ async function getCoins() {
 }
 
 async function getPortfolio() {
-    let holdings;
+    let portfolio;
     const activity = await knex.select('*').from('holdings').orderBy([
         { column: 'purchase_date', order: 'desc' }
     ])
-    // improve this query - sum of all unique coin id purchase amounts
-    const sum = await knex('holdings').sumDistinct('purchase_amount')
+    // Group and sum current holdings & purchase price
+    const holdings = await knex('holdings')
+        .select({ name: 'coin_id' })
+        .sum({ amount: 'purchase_amount' })
+        .groupBy('coin_id')
 
-    holdings = {
+    portfolio = {
         activity: activity,
-        sum: sum
+        holdings: holdings
     }
-    return buildResponse(200, holdings);
+    return buildResponse(200, portfolio);
 }
 
 async function getCoinInfo() {

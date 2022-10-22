@@ -10,15 +10,15 @@ const knex = require('knex')({
     }
 });
 
-const coinsPath = '/coins';
 const coinPath = '/coin';
+const coinsPath = '/coins';
 const infoPath = '/coin/info';
 const portfolioPath = '/portfolio';
 
 
+
 exports.handler = async (event) => {
     let response;
-    // console.log("request: " + JSON.stringify(event));
     switch (true) {
         case event.httpMethod === 'GET' && event.path === coinPath:
             response = await getCoin(event.queryStringParameters.id);
@@ -45,13 +45,13 @@ function buildResponse(statusCode, body) {
         },
         body: JSON.stringify(body)
     }
-}
+};
 
-
+// handle the coin route. return single coin information
 async function getCoin(id) {
-    const coinPrice = await knex.select('*').from('coin_price').where('coin_id', id).orderBy('created_date', 'desc');
+    const coinPrice = await knex.select('*').from('coin_price').limit(48).where('coin_id', id).orderBy('created_date', 'asc');
     return buildResponse(200, coinPrice)
-}
+};
 
 // handle the coins path. Return all coin price data
 async function getCoins() {
@@ -60,8 +60,9 @@ async function getCoins() {
         { column: 'price_usd', order: 'desc' }
     ])
     return buildResponse(200, allCoins);
-}
+};
 
+// handle portfolio route.
 async function getPortfolio() {
     let portfolio;
     const activity = await knex.select('*').from('holdings').orderBy([
@@ -78,9 +79,10 @@ async function getPortfolio() {
         holdings: holdings
     }
     return buildResponse(200, portfolio);
-}
+};
 
+// handle the coin/info route
 async function getCoinInfo() {
     const info = await knex.select('*').from('coin_info');
     return buildResponse(200, info);
-}
+};

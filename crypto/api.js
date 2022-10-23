@@ -59,7 +59,7 @@ async function getCoins() {
     const allCoins = await knex.select('*').from('coin_price').orderBy([
         { column: 'created_date', order: 'desc' },
         { column: 'price_usd', order: 'desc' }
-    ]);
+    ]).limit(50);
     const allPrices = await knex.select('price_usd', 'coin_id', 'created_date').from('coin_price').limit(48).orderBy('created_date', 'desc');
     data = {
         coins: allCoins,
@@ -80,9 +80,14 @@ async function getPortfolio() {
         .sum({ amount: 'purchase_amount' })
         .groupBy('coin_id')
 
+    const currentPrice = await knex.select('*').from('coin_price').orderBy([
+        { column: 'created_date', order: 'desc' }
+    ]).limit(10);
+
     portfolio = {
         activity: activity,
-        holdings: holdings
+        holdings: holdings,
+        currentPrice: currentPrice
     }
     return buildResponse(200, portfolio);
 };

@@ -27,7 +27,7 @@ exports.handler = async (event) => {
             response = await getCoins();
             break;
         case event.httpMethod === 'GET' && event.path === infoPath:
-            response = await getCoinInfo();
+            response = await getCoinInfo(event.queryStringParameters.id);
             break;
         case event.httpMethod === 'GET' && event.path === portfolioPath:
             response = await getPortfolio();
@@ -55,11 +55,17 @@ async function getCoin(id) {
 
 // handle the coins path. Return all coin price data
 async function getCoins() {
+    let data;
     const allCoins = await knex.select('*').from('coin_price').orderBy([
         { column: 'created_date', order: 'desc' },
         { column: 'price_usd', order: 'desc' }
-    ])
-    return buildResponse(200, allCoins);
+    ]);
+    const allPrices = await knex.select('price_usd', 'coin_id', 'created_date').from('coin_price').limit(48).orderBy('created_date', 'desc');
+    data = {
+        coins: allCoins,
+        prices: allPrices
+    }
+    return buildResponse(200, data);
 };
 
 // handle portfolio route.
@@ -82,7 +88,14 @@ async function getPortfolio() {
 };
 
 // handle the coin/info route
-async function getCoinInfo() {
-    const info = await knex.select('*').from('coin_info');
+async function getCoinInfo(id) {
+    let info;
+    const coinInfo = await knex.select('*').from('coin_info').where('coin_id', id);
+    const price = await knex.select('*').from('coin_price').limit(48).where('coin_id', id).orderBy('created_date', 'asc');
+
+    info = {
+        info: coinInfo,
+        price: price,
+    }
     return buildResponse(200, info);
 };

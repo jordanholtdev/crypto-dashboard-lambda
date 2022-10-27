@@ -7,8 +7,8 @@ const knex = require('knex')({
         port: 3306,
         user: process.env.DbUser,
         password: process.env.DbPw,
-        database: process.env.DbName
-    }
+        database: process.env.DbName,
+    },
 });
 
 /**
@@ -33,40 +33,48 @@ async function getCoinData(coin) {
             localization: false,
             sparkline: true,
             community_data: true,
-            developer_data: false
-        }
-    }
-    return axios.get(url, config)
+            developer_data: false,
+        },
+    };
+    return axios.get(url, config);
 }
 
 // get all data and modify for use
 async function getAllData() {
     let allData;
     try {
-        await Promise.all([getCoinData('bitcoin'), getCoinData('ethereum'), getCoinData('tether'), getCoinData('usd-coin'), getCoinData('binancecoin'), getCoinData('ripple'), getCoinData('binance-usd'), getCoinData('cardano'), getCoinData('solana'), getCoinData('dogecoin')])
-            .then((results => {
-                allData = [
-                    results[0].data,
-                    results[1].data,
-                    results[2].data,
-                    results[3].data,
-                    results[4].data,
-                    results[5].data,
-                    results[6].data,
-                    results[7].data,
-                    results[8].data,
-                    results[9].data,
-                ]
-            }))
-
+        await Promise.all([
+            getCoinData('bitcoin'),
+            getCoinData('ethereum'),
+            getCoinData('tether'),
+            getCoinData('usd-coin'),
+            getCoinData('binancecoin'),
+            getCoinData('ripple'),
+            getCoinData('binance-usd'),
+            getCoinData('cardano'),
+            getCoinData('solana'),
+            getCoinData('dogecoin'),
+        ]).then((results) => {
+            allData = [
+                results[0].data,
+                results[1].data,
+                results[2].data,
+                results[3].data,
+                results[4].data,
+                results[5].data,
+                results[6].data,
+                results[7].data,
+                results[8].data,
+                results[9].data,
+            ];
+        });
     } catch (error) {
-        console.error(error)
+        console.error(error);
     }
     return allData;
 }
 
 exports.lambdaHandler = async (event, context) => {
-
     try {
         const data = await getAllData();
         // loop through coins and insert into db
@@ -84,8 +92,8 @@ exports.lambdaHandler = async (event, context) => {
                 last_updated: coin.market_data.last_updated,
             });
         }
-        return "complete";
+        return 'complete';
     } catch (error) {
-        console.error(error)
+        console.error(error);
     }
 };

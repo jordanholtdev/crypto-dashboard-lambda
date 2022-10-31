@@ -1,1 +1,6 @@
-{}
+{
+    "scripts": {
+        "api": "sam local start-api --env-vars .env.test.json",
+        "invoke": "sam local invoke GetCoinDataFunction --env-vars .env.test.json"
+    }
+}

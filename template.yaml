@@ -1,82 +1,81 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  crypto-dashboard
+    crypto-dashboard
 
-  SAM Template for the Crypto Dashboard project. This contains all the config for the serverless aspect of the project.
-
+    SAM Template for the Crypto Dashboard project. This contains all the config for the serverless aspect of the project.
 
 Parameters:
-  DataBaseHost:
-    Type: String
-    Description: Required db host
-  DataBaseUser:
-    Type: String
-    Description: Database user
-  DataBaseName:
-    Type: String
-    Description: The name of the database that is being connected
-  DataBaseUserPw:
-    Type: String
-    Description: The pw for the database user
+    DataBaseHost:
+        Type: String
+        Description: Required db host
+    DataBaseUser:
+        Type: String
+        Description: Database user
+    DataBaseName:
+        Type: String
+        Description: The name of the database that is being connected
+    DataBaseUserPw:
+        Type: String
+        Description: The pw for the database user
 
 Resources:
-  GetCoinDataFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: crypto/
-      Handler: app.lambdaHandler
-      Runtime: nodejs16.x
-      Timeout: 45
-      Policies:
-        - AWSLambdaVPCAccessExecutionRole
-      Environment:
-        Variables:
-          MySqlHost: !Ref DataBaseHost
-          DbUser: !Ref DataBaseUser
-          DbPw: !Ref DataBaseUserPw
-          DbName: !Ref DataBaseName
-      Architectures:
-        - x86_64
-  CryptoApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: dev
-  ServeCoinDataOverHttps:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: crypto/
-      Handler: api.handler
-      Runtime: nodejs16.x
-      Timeout: 45
-      Environment:
-        Variables:
-          MySqlHost: !Ref DataBaseHost
-          DbUser: !Ref DataBaseUser
-          DbPw: !Ref DataBaseUserPw
-          DbName: !Ref DataBaseName
-      Events:
-        GetCoin:
-          Type: Api
-          Properties:
-            Path: '/coin'
-            Method: get
-            RestApiId: !Ref CryptoApi
-        GetCoins:
-          Type: Api
-          Properties:
-            Path: '/coins'
-            Method: get
-            RestApiId: !Ref CryptoApi
-        GetCoinInfo:
-          Type: Api
-          Properties:
-            Path: '/coin/info'
-            Method: get
-            RestApiId: !Ref CryptoApi
-        GetPortfolio:
-          Type: Api
-          Properties:
-            Path: '/portfolio'
-            Method: get
-            RestApiId: !Ref CryptoApi
+    GetCoinDataFunction:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: crypto/
+            Handler: app.lambdaHandler
+            Runtime: nodejs16.x
+            Timeout: 45
+            Policies:
+                - AWSLambdaVPCAccessExecutionRole
+            Environment:
+                Variables:
+                    MySqlHost: !Ref DataBaseHost
+                    DbUser: !Ref DataBaseUser
+                    DbPw: !Ref DataBaseUserPw
+                    DbName: !Ref DataBaseName
+            Architectures:
+                - x86_64
+    CryptoApi:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: Prod
+    ServeCoinDataOverHttps:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: crypto/
+            Handler: api.handler
+            Runtime: nodejs16.x
+            Timeout: 45
+            Environment:
+                Variables:
+                    MySqlHost: !Ref DataBaseHost
+                    DbUser: !Ref DataBaseUser
+                    DbPw: !Ref DataBaseUserPw
+                    DbName: !Ref DataBaseName
+            Events:
+                GetCoin:
+                    Type: Api
+                    Properties:
+                        Path: '/coin'
+                        Method: get
+                        RestApiId: !Ref CryptoApi
+                GetCoins:
+                    Type: Api
+                    Properties:
+                        Path: '/coins'
+                        Method: get
+                        RestApiId: !Ref CryptoApi
+                GetCoinInfo:
+                    Type: Api
+                    Properties:
+                        Path: '/coin/info'
+                        Method: get
+                        RestApiId: !Ref CryptoApi
+                GetPortfolio:
+                    Type: Api
+                    Properties:
+                        Path: '/portfolio'
+                        Method: get
+                        RestApiId: !Ref CryptoApi

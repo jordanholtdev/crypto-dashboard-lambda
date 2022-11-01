@@ -98,6 +98,9 @@ typings/
 .env*.local
 .env.json
 
+# config files
+samconfig.toml
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

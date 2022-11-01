@@ -81,18 +81,6 @@ exports.lambdaHandler = async (event, context) => {
         console.log('data', data);
         // loop through coins and insert into db
         for (const coin of data) {
-            // add coin info info
-            await knex('coin_info').insert({
-                coin_id: coin.id,
-                name: coin.name,
-                symbol: coin.symbol,
-                description: coin.description.en,
-                genesis_date: coin.genesis_date,
-                hashing_algorithm: coin.hashing_algorithm,
-                image: coin.image.large,
-                last_updated: coin.last_updated,
-                created_date: d.toISOString(),
-            });
             // add coin price data
             await knex('coin_price').insert({
                 coin_id: coin.id,

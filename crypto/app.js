@@ -78,7 +78,6 @@ exports.lambdaHandler = async (event, context) => {
     const d = new Date();
     try {
         const data = await getAllData();
-        console.log('data', data);
         // loop through coins and insert into db
         for (const coin of data) {
             // add coin price data
@@ -95,6 +94,11 @@ exports.lambdaHandler = async (event, context) => {
                 last_updated: coin.market_data.last_updated,
             });
         }
+        // delete 10 oldest entries
+        await knex.raw(
+            'delete from coin_price where created_date is not null order by created_date asc limit 10'
+        );
+
         return 'complete';
     } catch (error) {
         console.error(error);
